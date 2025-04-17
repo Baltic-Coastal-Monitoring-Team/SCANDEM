@@ -68,6 +68,14 @@ The app will launch in your browser at `http://localhost:8501`.
 
 If a file named demo.las exists in the input/ folder, the app will offer an automatic demo mode, ideal for testing or public showcasing. You can include a sample file as input/demo.las.
 
+To run the app in demo mode, download the sample LAS file and place it in the input/ folder with the name demo.las.
+
+Download demo file:
+[Download demo.las from OneDrive](https://uniwersytetszczecinski010-my.sharepoint.com/:u:/g/personal/jakub_sledziowski_usz_edu_pl/Ed3fvCisCCRDiZCG9IbfWXgBH2wxIXVC48gxGGIHpJ9ajQ?e=pBfIzt)
+
+Make sure the downloaded file is renamed to demo.las and saved inside the input/ directory.
+Once demo.las is detected in the input folder, the app will automatically enable demo mode – ideal for public presentations, tutorials, or first-time testing
+
 ## Project Status
 
 This application is under active development. Upcoming features may include:
