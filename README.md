@@ -19,7 +19,7 @@
 ![Preview](scandem_ui.png)
 
 ## Folder Structure
-
+```text
 scandem/ 
 ├── input/ # Folder for input LAS files (e.g., demo.las) 
 ├── output/ # Automatically generated output files 
@@ -28,7 +28,7 @@ scandem/
 ├── main.py # Main script to use from console
 ├── requirements.txt # Python dependencies 
 └── README.md # This file
-
+```
 
 ## Requirements
 
@@ -76,7 +76,7 @@ Export to GeoTIFF / GeoJSON
 Batch processing of multiple files
 
 ## Author
-Developer by Jakub Śledziowski, Kamran Tanwari, Paweł Terefenko as part of Baltic Coastal Monitoring Team.
+Developed by Paweł Terefenko, Kamran Tanwari, Jakub Śledziowski, Andrzej Giza, Xiaohao Shi as part of Baltic Coastal Monitoring Team.
 
 ## Licence
 Distributed under the MIT License.
