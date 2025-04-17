@@ -38,7 +38,10 @@ demo_file = "demo.las"
 demo_mode = False
 if demo_file not in input_files:
     demo_mode = False
-    st.warning("No .las files found in the 'input' folder.")
+    st.warning("No .las files found in the 'input' folder. If you don't have any, you can download the demo file:")
+    st.markdown(
+        "[Click here to download demo.las](https://uniwersytetszczecinski010-my.sharepoint.com/:u:/g/personal/jakub_sledziowski_usz_edu_pl/Ed3fvCisCCRDiZCG9IbfWXgBH2wxIXVC48gxGGIHpJ9ajQ?e=pBfIzt)"
+    )
     st.stop()
 else:
     demo_mode = st.checkbox("Use demo LAS file", value=True)
