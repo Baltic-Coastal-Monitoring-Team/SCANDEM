@@ -34,16 +34,18 @@ div.stFormSubmitButton > button:hover {
 # List available LAS files
 input_files = [f for f in os.listdir("input") if f.lower().endswith(".las")]
 
-demo_file = "demo.las"
-demo_mode = False
-if demo_file not in input_files:
-    demo_mode = False
+if not input_files:
     st.warning("No .las files found in the 'input' folder. If you don't have any, you can download the demo file:")
     st.markdown(
         "[Click here to download demo.las](https://uniwersytetszczecinski010-my.sharepoint.com/:u:/g/personal/jakub_sledziowski_usz_edu_pl/Ed3fvCisCCRDiZCG9IbfWXgBH2wxIXVC48gxGGIHpJ9ajQ?e=pBfIzt)"
-    )
+    ) 
     st.stop()
-else:
+
+demo_file = "demo.las"
+demo_mode = False
+
+# Offer demo mode only if demo.las is available
+if demo_file in input_files:
     demo_mode = st.checkbox("Use demo LAS file", value=True)
 
 if demo_mode:
@@ -52,36 +54,43 @@ else:
     selected_file = st.selectbox("Select a .las file to process:", input_files)
 
 with st.form("parameters_form"):
-    st.subheader("Classification and Interpolation Parameters")
+    st.subheader("Parameter Configuration")
+
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        epsg = st.text_input("EPSG Code", value="2180",
-                             help="Projection system used for reprojection")
-        smrf_scalar = st.number_input("SMRF: scalar", value=1.2,
-                             help="Scales window size; higher = more tolerant to vegetation")
-        smrf_threshold = st.number_input("SMRF: threshold", value=0.45,
-                             help="Elevation difference threshold to classify ground")
-        outlier_mean_k = st.number_input("Outlier: mean_k", value=8,
-                             help="Number of neighbors in statistical filter")
+        st.markdown("**Step 1: Outlier Detection**")
+        input_epsg = st.text_input("Input EPSG Code (optional)", value="",
+            help="Specify EPSG of the input LAS file if not defined in header (e.g. 4326). Leave empty to auto-detect.")
+    
+        outlier_mean_k = st.number_input("mean_k", value=8,
+            help="Number of neighbors in statistical filter (higher = smoother outlier detection)")
+        outlier_multiplier = st.number_input("multiplier", value=2.5,
+            help="Threshold multiplier to detect statistical outliers")
 
     with col2:
+        st.markdown("**Step 2: SMRF Classification**")
+        smrf_scalar = st.number_input("SMRF: scalar", value=1.2,
+            help="Scales window size; higher = more tolerant to vegetation")
         smrf_slope = st.number_input("SMRF: slope", value=0.4,
-                             help="Slope tolerance for surface model")
+            help="Slope tolerance for surface model")
         smrf_window = st.number_input("SMRF: window", value=16,
-                             help="Initial window size (in pixels)")
-        outlier_multiplier = st.number_input("Outlier: multiplier", value=2.5,
-                             help="Threshold multiplier for outlier detection")
-        raster_output_type = st.selectbox("Raster output type", ["min", "max", "mean"],
-                             help="Raster cell aggregation method (e.g., min elevation in cell)")
+            help="Initial window size (in pixels)")
+        smrf_threshold = st.number_input("SMRF: threshold", value=0.45,
+            help="Elevation difference threshold to classify ground")
 
     with col3:
-        interpolation_maxdist = st.number_input("Interpolation: max search distance", value=25,
-                             help="Max distance to search for fill values in interpolation")
-        interpolation_smoothing = st.number_input("Interpolation: smoothing iterations", value=5,
-                             help="Number of smoothing passes applied during nodata filling")
+        st.markdown("**Step 3: DEM Generation**")
+        epsg = st.text_input("EPSG Code", value="2180",
+            help="Projection system used for reprojection")
         raster_resolution = st.number_input("Raster resolution", value=0.1,
-                             help="Output raster pixel size in meters")
+            help="Output raster pixel size in meters")
+        raster_output_type = st.selectbox("Raster output type", ["min", "max", "mean"],
+            help="Raster cell aggregation method (e.g., min elevation in cell)")
+        interpolation_maxdist = st.number_input("Interpolation: max search distance", value=25,
+            help="Max distance to search for fill values in interpolation")
+        interpolation_smoothing = st.number_input("Interpolation: smoothing iterations", value=5,
+            help="Number of smoothing passes applied during nodata filling")
 
     submitted = st.form_submit_button("Run Processing")
 
@@ -114,10 +123,17 @@ if submitted:
 
     st.info("Running PDAL classification and DEM generation...")
 
+    reproj_filter = {
+        "type": "filters.reprojection",
+        "out_srs": f"EPSG:{config['epsg']}"
+    }
+    if input_epsg.strip():
+        reproj_filter["in_srs"] = f"EPSG:{input_epsg.strip()}"
+
     pipeline = {
         "pipeline": [
             {"type": "readers.las", "filename": config["input_file"]},
-            {"type": "filters.reprojection", "out_srs": f"EPSG:{config['epsg']}"},
+            reproj_filter,
             {"type": "filters.outlier", "method": "statistical",
              "mean_k": config["outlier_mean_k"], "multiplier": config["outlier_multiplier"]},
             {"type": "filters.smrf", "scalar": config["smrf_scalar"], "slope": config["smrf_slope"],
